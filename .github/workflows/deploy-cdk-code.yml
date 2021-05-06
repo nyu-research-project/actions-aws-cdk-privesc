@@ -63,11 +63,11 @@ jobs:
           npm install
           npm run build
       - name: Run CDK Synth
-        run: cdk synth
+        run: npm run cdk synth --force
       - name: Deploy stack
-        run: yes | cdk deploy
+        run: yes | npm run cdk deploy
       - name: Destroy stack
-        run: yes | cdk destroy
+        run: yes | npm run cdk destroy
   stop-runner:
     name: Stop self-hosted EC2 runner
     needs:
