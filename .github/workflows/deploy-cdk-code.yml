@@ -63,9 +63,15 @@ jobs:
         run: |
           npm install
           npm run build
+      - name: Associate EC2 instance profile
+        run: |
+          aws ec2 associate-iam-instance-profile \
+          --instance-id $(curl http://169.254.169.254/latest/meta-data/instance-id) \
+          --iam-instance-profile Name="GitHubActionsRunnerRole"
       - name: Bootstrap CDK environment
         run: |
           npm run cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_NUMBER }}/${{ secrets.AWS_REGION }} \
+          --trust ${{ secrets.AWS_ACCOUNT_NUMBER }} \
           --cloudformation-execution-policies arn:aws:iam::${{ secrets.AWS_ACCOUNT_NUMBER }}:policy/GitHubActionsRunner,\
           arn:aws:iam::${{ secrets.AWS_ACCOUNT_NUMBER }}:policy/iam-pass-role-research
       - name: Run CDK Synth
