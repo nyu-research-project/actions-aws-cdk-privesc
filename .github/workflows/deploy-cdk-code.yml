@@ -47,10 +47,9 @@ jobs:
     runs-on: ${{ needs.start-runner.outputs.label }} # run the job on the newly created runner
     steps:
       - name: Install Node
-        run: |
-          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
-          . ~/.nvm/nvm.sh
-          nvm install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '15'
       - name: Checkout repo
         uses: actions/checkout@v2
       - name: Set region
