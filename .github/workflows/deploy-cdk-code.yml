@@ -46,6 +46,11 @@ jobs:
     needs: start-runner # required to start the main job when the runner is ready
     runs-on: ${{ needs.start-runner.outputs.label }} # run the job on the newly created runner
     steps:
+      - name: Install Node
+        run: |
+          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+          . ~/.nvm/nvm.sh
+          nvm install node
       - name: Checkout repo
         uses: actions/checkout@v2
       - name: Set region
@@ -56,9 +61,6 @@ jobs:
           echo "S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}" >> .env
       - name: Build CDK code
         run: |
-          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
-          . ~/.nvm/nvm.sh
-          nvm install node
           npm install
           npm run build
       - name: Run CDK Synth
