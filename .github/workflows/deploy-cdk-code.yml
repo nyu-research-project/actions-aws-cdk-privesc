@@ -56,8 +56,8 @@ jobs:
           echo "S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}" >> .env
       - name: Build CDK code
         run: |
-          npx -p node@15 npm i
-          npx -p node@15 npm run build
+          nvm run npm install
+          nvm run npm run build
       - name: Run CDK Synth
         run: cdk synth
       - name: Deploy stack
