@@ -63,13 +63,12 @@ jobs:
         run: |
           npm install
           npm run build
+      - name: Assume role
+        run: |
+          aws sts assume-role --role-arn arn:aws:iam::${{ secrets.AWS_ACCOUNT_NUMBER }}:role/GitHubActionsRunnerRole --role-session-name ec2-github-runner
       - name: Bootstrap CDK environment
         run: |
-          npm run cdk bootstrap \
-          --profile arn:aws:iam::${{ secrets.AWS_ACCOUNT_NUMBER }}:instance-profile/GitHubActionsRunnerRole \
-          --cloudformation-execution-policies arn:aws:iam::${{ secrets.AWS_ACCOUNT_NUMBER }}:policy/GitHubActionsRunner \
-          --ec2creds false \
-          --ignore-errors
+          npm run cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_NUMBER }}/${{ secrets.AWS_REGION }}
       - name: Run CDK Synth
         run: npm run cdk synth --force
       - name: Deploy stack
