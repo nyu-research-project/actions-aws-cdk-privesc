@@ -62,6 +62,8 @@ jobs:
         run: |
           npm install
           npm run build
+      - name: Bootstrap CDK environment
+        run: npm run cdk bootstrap --force --ec2creds 
       - name: Run CDK Synth
         run: npm run cdk synth --force
       - name: Deploy stack
