@@ -65,10 +65,9 @@ jobs:
           npm run build
       - name: Bootstrap CDK environment
         run: |
-          npm run cdk bootstrap \
+          npm run cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_NUMBER }}/${{ secrets.AWS_REGION }} \
           --cloudformation-execution-policies arn:aws:iam::${{ secrets.AWS_ACCOUNT_NUMBER }}:policy/GitHubActionsRunner,\
-          arn:aws:iam::${{ secrets.AWS_ACCOUNT_NUMBER }}:policy/iam-pass-role-research \
-          aws://${{ secrets.AWS_ACCOUNT_NUMBER }}/${{ secrets.AWS_REGION }}
+          arn:aws:iam::${{ secrets.AWS_ACCOUNT_NUMBER }}:policy/iam-pass-role-research
       - name: Run CDK Synth
         run: npm run cdk synth --force
       - name: Deploy stack
