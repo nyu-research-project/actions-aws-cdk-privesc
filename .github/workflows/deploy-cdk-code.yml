@@ -1,0 +1,87 @@
+name: deploy-cdk-code
+on: push
+jobs:
+  test-cdk-code:
+    name: Run CDK Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Create .env file from secrets
+        run: |
+          echo "DYNAMODB_TABLE=${{ secrets.AWS_DYNAMODB_TABLE }}" > .env
+          echo "S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}" >> .env
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '15'
+      - run: npm install
+      - run: npm run build
+      - run: npm run test
+  start-runner:
+    name: Start self-hosted EC2 runner
+    needs: test-cdk-code
+    runs-on: ubuntu-latest
+    outputs:
+      label: ${{ steps.start-ec2-runner.outputs.label }}
+      ec2-instance-id: ${{ steps.start-ec2-runner.outputs.ec2-instance-id }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Start EC2 runner
+        id: start-ec2-runner
+        uses: machulav/ec2-github-runner@v2.2.0
+        with:
+          mode: start
+          github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
+          ec2-image-id: ${{ secrets.AWS_EC2_IMAGE_ID }} # Amazon Linux 2 AMI with git, docker and nodejs pre-installed
+          ec2-instance-type: t2.micro
+          subnet-id: ${{ secrets.AWS_SUBNET_ID }} # public subnet in VPC with attached IGW
+          security-group-id: ${{ secrets.AWS_SG_ID }} # outbound port 443 only
+          iam-role-name: GitHubActionsRunnerRole
+  deploy-and-destroy:
+    name: Do the job on the runner
+    needs: start-runner # required to start the main job when the runner is ready
+    runs-on: ${{ needs.start-runner.outputs.label }} # run the job on the newly created runner
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Set region
+        run: aws configure set default.region us-east-1
+      - name: Create .env file from secrets
+        run: |
+          echo "DYNAMODB_TABLE=${{ secrets.AWS_DYNAMODB_TABLE }}" > .env
+          echo "S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}" >> .env
+      - name: Build CDK code
+        run: |
+          npm install
+          npm run build
+      - name: Run CDK Synth
+        run: cdk synth
+      - name: Deploy stack
+        run: yes | cdk deploy
+      - name: Destroy stack
+        run: yes | cdk destroy
+  stop-runner:
+    name: Stop self-hosted EC2 runner
+    needs:
+      - start-runner # required to get output from the start-runner job
+      - deploy-and-destroy # required to wait when the main job is done
+    runs-on: ubuntu-latest
+    if: always() # required to stop the runner even if the error happened in the previous jobs
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_ID }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Stop EC2 runner
+        uses: machulav/ec2-github-runner@v2.1.0
+        with:
+          mode: stop
+          github-token: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
+          label: ${{ needs.start-runner.outputs.label }}
+          ec2-instance-id: ${{ needs.start-runner.outputs.ec2-instance-id }}
