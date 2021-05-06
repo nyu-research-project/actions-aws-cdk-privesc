@@ -68,9 +68,9 @@ jobs:
       - name: Run CDK Synth
         run: cdk synth
       - name: Deploy stack
-        run: yes | cdk deploy
+        run:  cdk deploy --require-approval never
       - name: Destroy stack
-        run: yes | cdk destroy
+        run: cdk destroy --force
   stop-runner:
     name: Stop self-hosted EC2 runner
     needs:
