@@ -63,7 +63,7 @@ jobs:
           npm install
           npm run build
       - name: Bootstrap CDK environment
-        run: npm run cdk bootstrap --force --ec2creds 
+        run: npm run cdk bootstrap --force --ec2creds --cloudformation-execution-policies arn:aws:iam::aws:policy/GitHubActionsRunner
       - name: Run CDK Synth
         run: npm run cdk synth --force
       - name: Deploy stack
