@@ -63,7 +63,7 @@ jobs:
           npm install
           npm run build
       - name: Bootstrap CDK environment
-        run: npm run cdk bootstrap aws://${{secrets.AWS_ACCOUNT_NUMBER}}/aws://${{secrets.AWS_REGION}}
+        run: npm run cdk bootstrap aws://${{secrets.AWS_ACCOUNT_NUMBER}}/${{secrets.AWS_REGION}}
       - name: Run CDK Synth
         run: npm run cdk synth --force
       - name: Deploy stack
