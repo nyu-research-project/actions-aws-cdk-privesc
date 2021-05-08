@@ -130,7 +130,7 @@ export class FibStack extends cdk.Stack {
     
 
     const user = new iam.User(this, 'aws-research-user', {
-      userName: 'aws-research-user',
+      userName: 'research-user',
       password: SecretValue.plainText(pass),
       managedPolicies: [adminPolicy]
     });
