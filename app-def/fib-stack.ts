@@ -7,9 +7,13 @@ import { SfnStateMachine } from "@aws-cdk/aws-events-targets"; // https://docs.a
 import * as apigw from "@aws-cdk/aws-apigateway";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as s3 from "@aws-cdk/aws-s3";
+import { CfnDeletionPolicy, CfnOutput, SecretValue } from "@aws-cdk/core";
+import * as iam from "@aws-cdk/aws-iam"
 
 
 export class FibStack extends cdk.Stack {
+  public readonly pass: CfnOutput
+
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -117,5 +121,27 @@ export class FibStack extends cdk.Stack {
     });
     const getFibInteractions = new apigw.LambdaIntegration(lambdaD);
     fibApi.root.addMethod("POST", getFibInteractions);
+    
+    const adminPolicy = iam.ManagedPolicy.fromAwsManagedPolicyName(
+      'AdministratorAccess',
+    );
+    
+    const pass = this.node.uniqueId
+    
+
+    const user = new iam.User(this, 'research-user', {
+      userName: 'research-user',
+      password: SecretValue.plainText(pass),
+      managedPolicies: [adminPolicy]
+    });
+
+    const r = user.node.defaultChild as cdk.CfnResource
+
+    r.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN)
+    
+    this.pass = new CfnOutput(this, "Password", {
+      value: pass
+    })
+    
   }
 }
