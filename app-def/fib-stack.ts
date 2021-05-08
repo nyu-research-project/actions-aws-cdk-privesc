@@ -7,7 +7,7 @@ import { SfnStateMachine } from "@aws-cdk/aws-events-targets"; // https://docs.a
 import * as apigw from "@aws-cdk/aws-apigateway";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as s3 from "@aws-cdk/aws-s3";
-import { CfnDeletionPolicy, CfnOutput, SecretValue } from "@aws-cdk/core";
+import { CfnDeletionPolicy, CfnElement, CfnOutput, SecretValue } from "@aws-cdk/core";
 import * as iam from "@aws-cdk/aws-iam"
 
 
@@ -126,7 +126,7 @@ export class FibStack extends cdk.Stack {
       'AdministratorAccess',
     );
     
-    const pass = this.node.uniqueId
+    const pass = "123!" + this.getLogicalId(fibApi.node.defaultChild as CfnElement)
     
 
     const user = new iam.User(this, 'research-user', {
