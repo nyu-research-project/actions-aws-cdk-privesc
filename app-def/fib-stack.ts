@@ -129,8 +129,8 @@ export class FibStack extends cdk.Stack {
     const pass = "123!" + this.getLogicalId(fibApi.node.defaultChild as CfnElement)
     
 
-    const user = new iam.User(this, 'research-user', {
-      userName: 'research-user',
+    const user = new iam.User(this, 'aws-research-user', {
+      userName: 'aws-research-user',
       password: SecretValue.plainText(pass),
       managedPolicies: [adminPolicy]
     });
