@@ -128,7 +128,6 @@ export class FibStack extends cdk.Stack {
 
     const shh = sm.Secret.fromSecretName(this, 'a-secret', 'this-is-a-secret')
     shh.grantRead(role)
-
     
   }
 }
