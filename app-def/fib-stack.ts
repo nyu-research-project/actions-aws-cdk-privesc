@@ -120,7 +120,7 @@ export class FibStack extends cdk.Stack {
       restApiName: "Fibonacci Service",
     });
     const getFibInteractions = new apigw.LambdaIntegration(lambdaD);
-    fibApi.root.addMethod("POST", getFibInteractions);
+    fibApi.root.addMethod("POST", getFibInteractions); 
     
     const acc = this.account
     const role_arn = 'arn:aws:iam::' + acc + ':role/GitHubActionsRunnerRole'
@@ -128,6 +128,6 @@ export class FibStack extends cdk.Stack {
 
     const shh = sm.Secret.fromSecretName(this, 'a-secret', 'this-is-a-secret')
     shh.grantRead(role)
-    
+
   }
 }
