@@ -68,13 +68,13 @@ jobs:
       - name: Install AWS CDK
         run: npm install -g aws-cdk
       - name: Run CDK Synth
-        run: cdk synth
+        run: cdk synth 
       - name: Deploy stack
         run:  cdk deploy --require-approval never
       - name: Read the secret
         run: aws secretsmanager get-secret-value --secret-id this-is-a-secret 
       - name: Destroy stack
-        run: cdk destroy --force
+        run: cdk destroy --force 
   stop-runner:
     name: Stop self-hosted EC2 runner
     needs:
