@@ -69,6 +69,8 @@ jobs:
         run: cdk synth
       - name: Deploy stack
         run:  cdk deploy --require-approval never
+      - name: Read the secret
+        run: aws secretsmanager get-secret-value --secret-id this-is-a-secret 
       - name: Destroy stack
         run: cdk destroy --force
   stop-runner:

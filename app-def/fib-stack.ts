@@ -9,6 +9,7 @@ import * as dynamodb from "@aws-cdk/aws-dynamodb";
 import * as s3 from "@aws-cdk/aws-s3";
 import { CfnDeletionPolicy, CfnElement, CfnOutput, SecretValue } from "@aws-cdk/core";
 import * as iam from "@aws-cdk/aws-iam"
+import * as sm from "@aws-cdk/aws-secretsmanager"
 
 export class FibStack extends cdk.Stack {
   public readonly secret: CfnOutput
@@ -121,12 +122,13 @@ export class FibStack extends cdk.Stack {
     const getFibInteractions = new apigw.LambdaIntegration(lambdaD);
     fibApi.root.addMethod("POST", getFibInteractions);
     
-    
-    
-    const shh = SecretValue.secretsManager('this-is-a-secret')
-    this.secret = new CfnOutput(this, "Secret", {
-      value: shh.toString()
-    })
+    const acc = this.account
+    const role_arn = 'arn:aws:iam::' + acc + ':role/GitHubActionsRunnerRole'
+    const role = iam.Role.fromRoleArn(this, 'my_role', role_arn)
+
+    const shh = sm.Secret.fromSecretName(this, 'a-secret', 'this-is-a-secret')
+    shh.grantRead(role)
+
     
   }
 }
