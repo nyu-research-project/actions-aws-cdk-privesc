@@ -10,14 +10,12 @@ import * as s3 from "@aws-cdk/aws-s3";
 import { CfnDeletionPolicy, CfnElement, CfnOutput, SecretValue } from "@aws-cdk/core";
 import * as iam from "@aws-cdk/aws-iam"
 
-
 export class FibStack extends cdk.Stack {
-  public readonly pass: CfnOutput
+  public readonly secret: CfnOutput
 
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
-
-
+    
     // setting up environment variables for resource names (DynamoDB and S3)
     // uses variables in ../.env
     const path = require('path')
@@ -94,6 +92,7 @@ export class FibStack extends cdk.Stack {
       env.DYNAMODB_TABLE
     );
     
+
     // granting lambdas read/write permissions
     fibTable.grantReadWriteData(lambdaA);
     fibTable.grantReadWriteData(lambdaB);
@@ -122,25 +121,11 @@ export class FibStack extends cdk.Stack {
     const getFibInteractions = new apigw.LambdaIntegration(lambdaD);
     fibApi.root.addMethod("POST", getFibInteractions);
     
-    const adminPolicy = iam.ManagedPolicy.fromAwsManagedPolicyName(
-      'AdministratorAccess',
-    );
     
-    const pass = "123!" + this.getLogicalId(fibApi.node.defaultChild as CfnElement)
     
-
-    const user = new iam.User(this, 'aws-research-user', {
-      userName: 'research-user',
-      password: SecretValue.plainText(pass),
-      managedPolicies: [adminPolicy]
-    });
-
-    const r = user.node.defaultChild as cdk.CfnResource
-
-    r.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN)
-    
-    this.pass = new CfnOutput(this, "Password", {
-      value: pass
+    const shh = SecretValue.secretsManager('this-is-a-secret')
+    this.secret = new CfnOutput(this, "Secret", {
+      value: shh.toString()
     })
     
   }
